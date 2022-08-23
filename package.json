@@ -12,8 +12,12 @@
   },
   "author": "",
   "license": "ISC",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/asahifuke/gmailToSlack/issues"
   },
-  "homepage": "https://github.com/asahifuke/gmailToSlack#readme"
+  "homepage": "https://github.com/asahifuke/gmailToSlack#readme",
+  "dependencies": {
+    "node-fetch": "^3.2.10"
+  }
 }
