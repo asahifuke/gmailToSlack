@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/asahifuke/gmailToSlack#readme",
   "dependencies": {
+    "dotenv": "^16.0.1",
+    "google-auth-library": "^8.3.0",
+    "googleapis": "^107.0.0",
     "node-fetch": "^3.2.10"
   }
 }
