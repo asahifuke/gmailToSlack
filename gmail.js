@@ -2,6 +2,7 @@ import fs from 'fs';
 import readline from 'readline';
 import {google} from 'googleapis';
 import { AttachmentFile } from './model/attachmentFile.js'
+import { Slack } from './model/slack.js';
 import dotenv from 'dotenv'
 dotenv.config();
 
@@ -17,7 +18,7 @@ class Gmail {
   run() {
     fs.readFile(this.client_secret_path, (err, content) => {
       if (err) return console.log('Error loading client secret file:', err);
-      this.#authorize(JSON.parse(content), this.#gmailSendSlack);
+      this.#authorize(JSON.parse(content));
     });
   }
 
@@ -38,7 +39,7 @@ class Gmail {
     fs.readFile(this.token_path, (err, token) => {
       if (err) return this.#getNewToken(oAuth2Client, callback);
       oAuth2Client.setCredentials(JSON.parse(token));
-      callback(oAuth2Client);
+      this.#gmailSendSlack(oAuth2Client);
     });
   }
 
@@ -85,18 +86,33 @@ class Gmail {
    *
    * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
    */
+
   async #gmailSendSlack(auth) {
     const gmail = google.gmail({ version: 'v1', auth });
     const resList = await gmail.users.messages.list({userId: 'me', q: 'フィヨルドブートキャンプからの領収書'});
     const lastMessage = resList.data.messages[0]
-    const resMes = await gmail.users.messages.get({
-      userId: 'me',
-      id: lastMessage.id,
-      format: 'FULL'
-    });
+    const resMes = await gmail.users.messages.get({ userId: 'me', id: lastMessage.id, format: 'FULL' });
+    const attachmentFiles = await AttachmentFile.getParts(
+      gmail, 
+      await resMes.data.payload.parts, 
+      await lastMessage
+    )
 
-    const attachmentFiles = await AttachmentFile.getParts(await auth, await resList, await resMes, gmail, await resMes.data.payload.parts)
-    attachmentFiles.map(async attachmentFile =>{ await attachmentFile.send()});
+    attachmentFiles.map(async attachmentFile =>{ 
+      await attachmentFile.writePdf()
+      this.#sendSlack()
+    });
+  }
+
+  #sendSlack() {
+    new Slack(
+      './files/download.pdf', 
+      // 'hr_rng23_is_fuke', 
+      'test2',
+      'https://slack.com/api/files.upload', 
+      'POST', 
+      '@Ayana Takahashi お疲れ様です！フィヨルドブートキャンプの請求書です。よろしくお願い致します。'
+    ).send()
   }
 }
 

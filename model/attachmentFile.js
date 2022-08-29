@@ -1,22 +1,18 @@
-import {google} from 'googleapis';
-import {Slack} from './slack.js';
 import fs from 'fs';
 
 
 export class AttachmentFile {
-  constructor(auth, resList, resMes, gmail, part) {
-    this.auth = auth
-    this.resList = resList
-    this.resMes = resMes
+  constructor(gmail, part, lastMessage) {
     this.gmail = gmail
     this.part = part
+    this.lastMessage = lastMessage
   }
 
-  static async getParts(auth, resList, resMes, gmail, parts) {
+  static async getParts(gmail, parts, lastMessage) {
     return parts.map(part => {
-      const attachmentFile = new AttachmentFile(auth, resList, resMes, gmail, part)
+      const attachmentFile = new AttachmentFile(gmail, part, lastMessage)
       if (attachmentFile.isPartMimeTypePdf()) { return attachmentFile }
-      if (attachmentFile.isExistParts()) { AttachmentFile.getParts(auth, resList, resMes, gmail, part.parts)}
+      if (attachmentFile.isExistParts()) { AttachmentFile.getParts(gmail, part.parts, lastMessage)}
     }).filter(Boolean)
   }
 
@@ -32,40 +28,25 @@ export class AttachmentFile {
     return new Buffer.from(data, 'base64');
   }
 
-  async getResponse(attachmentId) {
+  async getResponse() {
     return await this.gmail.users.messages.attachments.get({
       userId: 'me',
-      id: attachmentId,
-      messageId: this.lastMessage().id,
+      id: this.getAttachmentId(),
+      messageId: this.lastMessage.id,
     })
   }
 
   async writePdf() {
     if (this.getAttachmentId()) {
-      const response = await this.getResponse(this.getAttachmentId());
+      const response = await this.getResponse();
       fs.writeFile(`./files/download.pdf`, await this.base64DecodeFile(await response.data.data), (err) => {
         if (err) return console.error(err);
       });
     }
   }
 
-  async send() {
-    await this.writePdf()
-    new Slack(
-      './files/download.pdf', 
-      // 'hr_rng23_is_fuke', 
-      'test2',
-      'https://slack.com/api/files.upload', 
-      'POST', 
-      '@Ayana Takahashi お疲れ様です！フィヨルドブートキャンプの請求書です。よろしくお願い致します。'
-    ).send()
-  }
-
-  lastMessage() {
-    return this.resList.data.messages[0];
-  }
-
   isExistParts() {
     return this.part.parts
   }
 }
+
