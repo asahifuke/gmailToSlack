@@ -1,24 +1,27 @@
-import { Part } from './part.js';
 import {google} from 'googleapis';
+import {Slack} from './slack.js';
 import fs from 'fs';
-import fetch, { FormData, fileFromSync } from 'node-fetch';
 
-export class AttachmentFile extends Part {
+
+export class AttachmentFile {
   constructor(auth, resList, resMes, gmail, part) {
-    super(auth, resList, resMes, gmail, part)
+    this.auth = auth
+    this.resList = resList
+    this.resMes = resMes
+    this.gmail = gmail
+    this.part = part
   }
 
   static async getParts(auth, resList, resMes, gmail, parts) {
     return parts.map(part => {
       const attachmentFile = new AttachmentFile(auth, resList, resMes, gmail, part)
-      if (attachmentFile.isPartMimeTypePng()) { return attachmentFile }
-      if (attachmentFile.isExistParts()) { return AttachmentFile.getParts(auth, resList, resMes, gmail, part.parts)}
+      if (attachmentFile.isPartMimeTypePdf()) { return attachmentFile }
+      if (attachmentFile.isExistParts()) { AttachmentFile.getParts(auth, resList, resMes, gmail, part.parts)}
     }).filter(Boolean)
   }
 
-
-   isPartMimeTypePng() {
-    return this.part.mimeType === 'image/png'
+  isPartMimeTypePdf() {
+    return this.part.mimeType === 'application/pdf'
   }
 
   getAttachmentId() {
@@ -37,35 +40,32 @@ export class AttachmentFile extends Part {
     })
   }
 
-  
-
-  async require() {
+  async writePdf() {
     if (this.getAttachmentId()) {
       const response = await this.getResponse(this.getAttachmentId());
-      fs.writeFile(`./files/download.png`, await this.base64DecodeFile(await response.data.data), (err) => {
+      fs.writeFile(`./files/download.pdf`, await this.base64DecodeFile(await response.data.data), (err) => {
         if (err) return console.error(err);
       });
     }
   }
 
   async send() {
-    await this.require()
-    fs.readFile('./files/download.png', (err, token) => {
-      const form = new FormData();
-      form.append('file', fileFromSync('./files/download.png'));
-      form.append('channels', 'test2');
-
-      fetch('https://slack.com/api/files.upload', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${process.env.SLACK_TOKEN}`
-        },
-        body: form
-      });
-    });
+    await this.writePdf()
+    new Slack(
+      './files/download.pdf', 
+      // 'hr_rng23_is_fuke', 
+      'test2',
+      'https://slack.com/api/files.upload', 
+      'POST', 
+      '@Ayana Takahashi お疲れ様です！フィヨルドブートキャンプの請求書です。よろしくお願い致します。'
+    ).send()
   }
 
   lastMessage() {
     return this.resList.data.messages[0];
+  }
+
+  isExistParts() {
+    return this.part.parts
   }
 }

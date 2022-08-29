@@ -1,28 +1,23 @@
 import fs from 'fs';
 import readline from 'readline';
 import {google} from 'googleapis';
-import { endianness } from 'os';
-import { Gmail } from './model/gmail.js'
-import { Slack } from './model/slack.js'
-import { Header } from './model/header.js'
-import { Body } from './model/body.js'
 import { AttachmentFile } from './model/attachmentFile.js'
 import dotenv from 'dotenv'
-import { Part } from './model/part.js';
 dotenv.config();
 
-
-class GmailOAuth {
+class Gmail {
   constructor() {
     this.scopes = ['https://www.googleapis.com/auth/gmail.readonly']
-    this.client_secret_path = '/Users/asahi.fuke/Desktop/client_secret_248895458266-rq0lf1gdi4rcb02lks08uhi1ic0u1n7i.apps.googleusercontent.com.json'
+    this.client_secret_path = './client_secret_248895458266-rq0lf1gdi4rcb02lks08uhi1ic0u1n7i.apps.googleusercontent.com.json'
     this.token_path = 'token.json'
+    this.userId = 'me'
+    this.q = 'フィヨルドブートキャンプからの領収書'
   }
 
   run() {
     fs.readFile(this.client_secret_path, (err, content) => {
       if (err) return console.log('Error loading client secret file:', err);
-      this.#authorize(JSON.parse(content), this.#listLabels);
+      this.#authorize(JSON.parse(content), this.#gmailSendSlack);
     });
   }
 
@@ -90,9 +85,9 @@ class GmailOAuth {
    *
    * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
    */
-  async #listLabels(auth) {
+  async #gmailSendSlack(auth) {
     const gmail = google.gmail({ version: 'v1', auth });
-    const resList = await gmail.users.messages.list({userId: 'me', q: 'Ferdfaxcdas'});
+    const resList = await gmail.users.messages.list({userId: 'me', q: 'フィヨルドブートキャンプからの領収書'});
     const lastMessage = resList.data.messages[0]
     const resMes = await gmail.users.messages.get({
       userId: 'me',
@@ -100,22 +95,9 @@ class GmailOAuth {
       format: 'FULL'
     });
 
-    new Header(await auth, await resList, await resMes, gmail, 'date').send()
-
-    if (resMes.data.payload.parts) {
-      await Part.getParts(auth, resList, resMes, gmail, resMes.data.payload.parts).map(async part => {
-        await part.send()
-      })
-    } else {
-      new Body(resMes.data.payload.body).require()
-    }
-  
     const attachmentFiles = await AttachmentFile.getParts(await auth, await resList, await resMes, gmail, await resMes.data.payload.parts)
-    attachmentFiles.map(async attachmentFile =>{
-      const nowAttachmentFile = await attachmentFile
-      nowAttachmentFile[0].send()
-    });
+    attachmentFiles.map(async attachmentFile =>{ await attachmentFile.send()});
   }
 }
 
-new GmailOAuth().run()
+new Gmail().run()
