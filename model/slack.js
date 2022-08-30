@@ -15,6 +15,7 @@ export class Slack {
       const form = new FormData();
       form.append('file', fileFromSync(this.filePath));
       form.append('channels', this.channelName);
+      form.append('initial_comment', this.message);
 
       fetch(this.uri, {
         method: this.method,
