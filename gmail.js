@@ -17,7 +17,7 @@ class Gmail {
     this.format = 'FULL'
     this.pdfPath = './files/download.pdf'
     this.slackUri = 'https://slack.com/api/files.upload'
-    this.channel = 'test2'// 'hr_rng23_is_fuke', 
+    this.channel = 'test4'// 'hr_rng23_is_fuke', 
     this.method = 'POST'
     this.messages = '@Ayana Takahashi お疲れ様です！フィヨルドブートキャンプの請求書です。よろしくお願い致します。'
   }
