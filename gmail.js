@@ -1,25 +1,26 @@
 import fs from 'fs';
 import readline from 'readline';
 import {google} from 'googleapis';
-import { AttachmentFile } from './model/attachmentFile.js'
+import { AttachmentFile } from './model/attachmentFile.js';
 import { Slack } from './model/slack.js';
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
+import program from 'commander';
 dotenv.config();
 
 class Gmail {
-  constructor() {
-    this.scopes = ['https://www.googleapis.com/auth/gmail.readonly']
-    this.client_secret_path = './client_secret_248895458266-rq0lf1gdi4rcb02lks08uhi1ic0u1n7i.apps.googleusercontent.com.json'
-    this.token_path = 'token.json'
-    this.userId = 'me'
-    this.q = 'フィヨルドブートキャンプからの領収書'
-    this.version = 'v1'
-    this.format = 'FULL'
-    this.pdfPath = './files/download.pdf'
-    this.slackUri = 'https://slack.com/api/files.upload'
-    this.channel = 'test4'// 'hr_rng23_is_fuke', 
-    this.method = 'POST'
-    this.messages = '@Ayana Takahashi お疲れ様です！フィヨルドブートキャンプの請求書です。よろしくお願い致します。'
+  constructor(q, channel, messages) {
+    this.scopes = ['https://www.googleapis.com/auth/gmail.readonly'];
+    this.client_secret_path = './client_secret_248895458266-rq0lf1gdi4rcb02lks08uhi1ic0u1n7i.apps.googleusercontent.com.json';
+    this.token_path = 'token.json';
+    this.userId = 'me';
+    this.q = q;
+    this.version = 'v1';
+    this.format = 'FULL';
+    this.pdfPath = './files/download.pdf';
+    this.slackUri = 'https://slack.com/api/files.upload';
+    this.channel = channel;
+    this.method = 'POST';
+    this.messages = messages;
   }
 
   run() {
@@ -81,7 +82,7 @@ class Gmail {
         oAuth2Client.setCredentials(token);
         fs.writeFile(this.token_path, JSON.stringify(token), (err) => {
           if (err) return console.error(err);
-          console.log('Token stored to', token_path());
+          console.log('Token stored to', this.token_path);
         });
         callback(oAuth2Client);
       });
@@ -97,16 +98,16 @@ class Gmail {
   async #gmailSendSlack(auth) {
     const gmail = google.gmail({ version: this.version, auth });
     const resList = await gmail.users.messages.list({userId: this.userId, q: this.q});
-    const lastMessage = resList.data.messages[0]
+    const lastMessage = resList.data.messages[0];
     const resMes = await gmail.users.messages.get({ userId: this.userId, id: lastMessage.id, format: this.format});
-    this.#sendAttachmentFilesToSlack(gmail,resMes, lastMessage)
+    this.#sendAttachmentFilesToSlack(gmail,resMes, lastMessage);
   }
 
   async #sendAttachmentFilesToSlack(gmail,resMes, lastMessage) {
-    const attachmentFiles = await this.#createAttachmentFiles(gmail, resMes, lastMessage)
+    const attachmentFiles = await this.#createAttachmentFiles(gmail, resMes, lastMessage);
     attachmentFiles.map(async attachmentFile =>{ 
-      await attachmentFile.writePdf(this.pdfPath)
-      this.#sendSlack()
+      await attachmentFile.writePdf(this.pdfPath);
+      this.#sendSlack();
     });
   }
 
@@ -115,7 +116,7 @@ class Gmail {
       gmail, 
       await resMes.data.payload.parts, 
       await lastMessage
-    )
+    );
   }
 
   #sendSlack() {
@@ -125,8 +126,11 @@ class Gmail {
       this.slackUri, 
       this.method, 
       this.messages
-    ).send()
+    ).send();
   }
 }
-
-new Gmail().run()
+// 'フィヨルドブートキャンプからの領収書'
+// 'test4'// 'hr_rng23_is_fuke', 
+// '@Ayana Takahashi お疲れ様です！フィヨルドブートキャンプの請求書です。よろしくお願い致します。'
+program.parse(process.argv);
+new Gmail(program.args[0], program.args[1], program.args[2]).run();

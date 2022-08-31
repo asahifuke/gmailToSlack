@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,9 +19,13 @@
   },
   "homepage": "https://github.com/asahifuke/gmailToSlack#readme",
   "dependencies": {
+    "commander": "5.0",
     "dotenv": "^16.0.1",
     "google-auth-library": "^8.3.0",
     "googleapis": "^107.0.0",
     "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "eslint": "^8.23.0"
   }
 }

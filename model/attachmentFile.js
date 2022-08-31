@@ -2,17 +2,17 @@ import fs from 'fs';
 
 export class AttachmentFile {
   constructor(gmail, part, lastMessage) {
-    this.gmail = gmail
-    this.part = part
-    this.lastMessage = lastMessage
+    this.gmail = gmail;
+    this.part = part;
+    this.lastMessage = lastMessage;
   }
 
   static async getParts(gmail, parts, lastMessage) {
     return parts.map(part => {
-      const attachmentFile = new AttachmentFile(gmail, part, lastMessage)
-      if (attachmentFile.#isPartMimeTypePdf()) { return attachmentFile }
-      if (attachmentFile.#isExistParts()) { AttachmentFile.getParts(gmail, part.parts, lastMessage)}
-    }).filter(Boolean)
+      const attachmentFile = new AttachmentFile(gmail, part, lastMessage);
+      if (attachmentFile.#isPartMimeTypePdf()) { return attachmentFile; }
+      if (attachmentFile.#isExistParts()) { AttachmentFile.getParts(gmail, part.parts, lastMessage);}
+    }).filter(Boolean);
   }
 
   async writePdf(path) {
@@ -25,11 +25,11 @@ export class AttachmentFile {
   }
 
   #isPartMimeTypePdf() {
-    return this.part.mimeType === 'application/pdf'
+    return this.part.mimeType === 'application/pdf';
   }
 
   #getAttachmentId() {
-    return this.part.body.attachmentId
+    return this.part.body.attachmentId;
   }
 
   #base64DecodeFile(data){
@@ -41,11 +41,11 @@ export class AttachmentFile {
       userId: 'me',
       id: this.#getAttachmentId(),
       messageId: this.lastMessage.id,
-    })
+    });
   }
 
   #isExistParts() {
-    return this.part.parts
+    return this.part.parts;
   }
 }
 
