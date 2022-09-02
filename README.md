@@ -1,4 +1,6 @@
 # GmailToSlack
+Gmailに送られた画像をslackに送信するライブラリ
+
 ## なぜこれを作ろうと思ったかというと
 私は、フィヨルドブートキャンプの領収書と請求書を会社の人事に送る必要があります。
 私は、「Gmailを開いて、画像をダウンロードして、Slackにアップロードしてに送信することに手間がかる。」
@@ -7,6 +9,14 @@
 そこで、本プログラムを実装して、自動化することで、課題を解決しようと試みました。
 
 ## インストール方法
+### Gmail Access Token取得方法
+以下のURLの初めから5分00秒のところまでを行なってください。
+そのとき、取得したい画像があるGmailのGoogleアカウントで行なってください。
+そのとき、ダウンロードしたcredentials.jsonを適当なところに配置してください。
+https://youtu.be/L4BH1sDRpaQ?t=299
+
+### SlackAPIAccessTokenの取得方法
+
 [ここ](https://api.slack.com/)にアクセス
 ![](/images/2.png) 
 赤丸のボタンをクリック
@@ -33,7 +43,7 @@
 許可します。
 
 ![](/images/12.png) 
-OAth keyをコピーしておきます。
+OAth keyをコピーしておきます。※１
 
 ![](/images/10.png) 
 アプリを追加するをクリックします。
@@ -41,9 +51,27 @@ OAth keyをコピーしておきます。
 ![](/images/11.png) 
 インストールしたアプリをワークスペースに追加します
 
-
 ## 使い方
+- npmをインストール
 ```
-usage
+npm i gmailtoslack
 ```
+
+```
+./gmail.js フィヨルドブートキャンプからの領収書 [slackのチャンネル名] [slackに送信するメッセージ] [Gmail Access Token取得方法のところでダウンロードしたcredentials.jsonの絶対パス] [Slack API Access Token の取得方法の※１で取得したOAth key]
+```
+
+![](/images/13.png) 
+Gmail APIを取得したアカウントでサインインしてください。
+
+![](/images/14.png) 
+赤丸の部分をクリックしてください。
+
+![](/images/15.png) 
+続行をクリックしてください。
+
+![](/images/16.png) 
+以下のようになればGmailの認証は成功です。
+
+これで、指定しているチャンネルに画像が送信されます。
 

@@ -2,12 +2,13 @@ import fetch, { FormData, fileFromSync } from 'node-fetch';
 import fs from 'fs';
 
 export class Slack {
-  constructor(filePath, channelName, uri, method, message) {
+  constructor(filePath, channelName, uri, method, message, slack_token) {
     this.filePath = filePath;
     this.channelName = channelName;
     this.uri = uri;
     this.method = method;
     this.message = message;
+    this.slack_token = slack_token;
   }
 
   send() {
@@ -20,7 +21,7 @@ export class Slack {
       fetch(this.uri, {
         method: this.method,
         headers: {
-            'Authorization': `Bearer ${process.env.SLACK_TOKEN}`
+            'Authorization': `Bearer ${this.slack_token}`
         },
         body: form
       });
