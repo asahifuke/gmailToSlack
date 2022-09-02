@@ -1,0 +1,34 @@
+{
+  "name": "gmailtoslack",
+  "version": "1.0.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "gmailToSlack": "bin/gmail.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asahifuke/gmailToSlack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/asahifuke/gmailToSlack/issues"
+  },
+  "homepage": "https://github.com/asahifuke/gmailToSlack#readme",
+  "dependencies": {
+    "commander": "5.0",
+    "dotenv": "^16.0.1",
+    "google-auth-library": "^8.3.0",
+    "googleapis": "^107.0.0",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "eslint": "^8.23.0"
+  }
+}
