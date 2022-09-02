@@ -7,6 +7,9 @@
     "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "gmailToSlack": "bin/gmail.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/asahifuke/gmailToSlack.git"

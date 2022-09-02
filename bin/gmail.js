@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { AttachmentFile } from './model/attachmentFile.js';
-import { Slack } from './model/slack.js';
+import { AttachmentFile } from '../model/attachmentFile.js';
+import { Slack } from '../model/slack.js';
 import dotenv from 'dotenv';
 import program from 'commander';
 import { promises as fs } from 'fs';
